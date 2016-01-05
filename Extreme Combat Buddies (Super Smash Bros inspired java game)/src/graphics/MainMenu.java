@@ -1,7 +1,8 @@
 package graphics;
 
 import java.awt.*;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -9,21 +10,35 @@ import javax.swing.JPanel;
 import characters.TestSprite;
 import game.CombatEntity;
 
-public class MainMenu extends JPanel {
-	TestSprite ts;
+public class MainMenu extends JPanel implements ActionListener{
+	TestBoard tb;
 	MainMenu() {
 	JButton start = new JButton("Start Game");
 	add(start);
-	ts = new TestSprite();
-	addKeyListener(ts);
-	setFocusable(true);
+	start.addActionListener(this);
 	}
 	
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.drawImage(ts.sprite, (int) ts.location.getX(), (int) ts.location.getY(), null);
+		//whatever menu here
 	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getActionCommand().equals("Start Game")) {
+			System.out.println("triggered");
+			remove(this);
+			tb = new TestBoard();
+			add(tb);
+			validate();
+		    repaint();
+
+		}
+	}
+	
+
 	
 }

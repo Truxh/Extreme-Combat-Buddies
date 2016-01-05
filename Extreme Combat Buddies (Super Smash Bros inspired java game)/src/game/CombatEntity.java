@@ -31,14 +31,15 @@ public class CombatEntity implements KeyListener, Runnable{
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
-		e.getKeyCode();
+		pressedKeys[e.getKeyCode()] = 1;
 		System.out.println(e);
 	}
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
+	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+		pressedKeys[e.getKeyCode()] = 0;
+		System.out.println(e);
 	}
 
 	@Override
@@ -48,6 +49,7 @@ public class CombatEntity implements KeyListener, Runnable{
 	}
 	
 	public void move() {
+	
 		
 	}
 	public void jump() {

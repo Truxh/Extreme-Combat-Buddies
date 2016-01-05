@@ -11,7 +11,9 @@ public class Window extends JFrame {
 		//add(display);
 		setVisible(true);
 		
-		MainMenu mm = new MainMenu();
-		add(mm);
+		//MainMenu mm = new MainMenu();
+		//add(mm);
+		TestBoard tb = new TestBoard();
+		add(tb);
 	}	
 }
