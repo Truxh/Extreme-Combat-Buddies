@@ -2,18 +2,17 @@ package graphics;
 import java.awt.*;
 import javax.swing.*;
 
+import game.Sprite;
+
+
 public class Window extends JFrame {
-	public Window() {
-		//Display display = new Display(); 
-		setTitle("Extreme Combat Buddies (Dev Build: 1)");
-		setSize(1920, 1080);
+	public static int width = 1920;
+	public static int height = 1080;
+	public Window(Display display) {
+		setTitle("Jumping Game");
+		setSize(1920, 1120);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		//add(display);
+		add(display);
 		setVisible(true);
-		
-		//MainMenu mm = new MainMenu();
-		//add(mm);
-		TestBoard tb = new TestBoard();
-		add(tb);
 	}	
 }
