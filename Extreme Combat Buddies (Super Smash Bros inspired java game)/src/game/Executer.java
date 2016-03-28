@@ -57,8 +57,6 @@ public class Executer {
 TODO: 
 Features:
 -crouch implementation
--jumping
--gravity
 -user customizable control schemes
 -death animation/effect
 -better walking animation

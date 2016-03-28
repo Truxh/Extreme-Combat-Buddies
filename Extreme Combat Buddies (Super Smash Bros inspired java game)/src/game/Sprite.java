@@ -15,10 +15,17 @@ import javax.imageio.ImageIO;
 import graphics.Display;
 
 public class Sprite implements KeyListener {
+	/*
+	 * TODO: 1) X movement equation, fix, acceleration of some sort built in? 2)
+	 * store last point and check if current exceeds border y, if so, backup,
+	 * else continue as normal
+	 */
+
 	File imageLoc = new File("Resources//soldier.png");
 	public BufferedImage img;
 	ControlSet cs;
 	public String name;
+	public double startX;
 	public double x = new Random().nextInt(1920 / Display.scale); // in feet
 	public double y = new Random().nextInt(1080 / Display.scale); // in feet
 	public int height = 70; // in pixels
@@ -39,15 +46,21 @@ public class Sprite implements KeyListener {
 	double teleportDelay = 0;
 	double burstDelay = 0;
 	double tburstDelay = 0;
+	double floorDelay = 0;
 	int burstCount = 0;
 	public int health = 3;
 
-	double xvelocity = 0;
+	double xvelocity = 1;
 	double yvelocity = 0;
-	double gravity = -32;
+	double gravity = -26;
 
 	double jumpTime = 0;
+	double xTime = 0;
 	double jumpDelay = 0;
+	public Rectangle hitbox = new Rectangle(0, 0, 1, 1);
+
+	Point lastPoint;
+	double prevX = x;
 
 	public Sprite(int i, String name, ControlSet cs) {
 		this.player = i;
@@ -57,6 +70,7 @@ public class Sprite implements KeyListener {
 		height = img.getHeight();
 		width = img.getWidth();
 		initKeys();
+		startX=x;
 	}
 
 	void readImage() {
@@ -72,28 +86,34 @@ public class Sprite implements KeyListener {
 		crouch = false;
 		if (pressedKeys[cs.left] == true && checkWalls() != true) {
 			xvelocity = -0.5;
-			x = x + xvelocity;
+			// x = x + xvelocity;
 			dir = false;
-		} else if (checkWalls() == true)
-			x--;
-
+		} else if (checkWalls() == true) {
+			// x++
+			/*
+			 * System.out.println("here"); xvelocity = 0; xTime -= 3;
+			 */
+		}
 		if (pressedKeys[cs.right] == true && checkWalls() != true) {
 			xvelocity = 0.5;
-			x = x + xvelocity;
+			// x = x + xvelocity;
 			dir = true;
-		} else if (checkWalls() == true)
-			x++;
-
-		if (pressedKeys[cs.jump] == true && time - jumpDelay >= 1) {
+		} else if (checkWalls() == true) {
+			/*
+			 * x-- xvelocity = 0; xTime -= 3;
+			 */
+		}
+		if (pressedKeys[cs.jump] == true && time - jumpDelay >= 0.5) {
 			yvelocity = 7;
 			y++;
 			jumpDelay = time;
+			jump = true;
 
 		}
 
 		if (pressedKeys[cs.crouch] == true) {
 			crouch = true;
-			xvelocity = 0;
+
 		} else
 			crouch = false;
 
@@ -123,21 +143,32 @@ public class Sprite implements KeyListener {
 		}
 
 		if (pressedKeys[cs.left] != true && pressedKeys[cs.right] != true) {
-			xvelocity = 0;
+			/*
+			 * xvelocity = 0; xTime = 0;
+			 */
+		}
+		if (player == 0) {
+			x = (xvelocity * xTime) + startX;
+			System.out.println(name);
+			System.out.println("Time: " + xTime);
+			System.out.println("Velocity: " + xvelocity);
+			System.out.println("X Coord: " + x);
+			System.out.println("Increase " + (x - prevX));
+			System.out.println("Time * Velocity: " + (xvelocity * xTime));
+			System.out.println("Previous X: " + prevX);
+			System.out.println("------------------------------------------- \n");
+			prevX = x;
+		}
+		if (checkFloor() != true) {
+			y = (0.5 * gravity * Math.pow(jumpTime, 2)) + yvelocity * jumpTime + y;
+			// x equation of movement
+			jump = false;
 		}
 
-		if (checkFloor() != true) {
-			// x = (xvelocity / 1000 * Math.cos(Math.toRadians(angle))) * time +
-			// x;
-			y = (0.5 * gravity * Math.pow(jumpTime, 2)) + yvelocity * jumpTime + y;
-			System.out.println(yvelocity);
-		}
-		
 		else {
 			jumpTime = 0;
 			yvelocity = 0;
 		}
-
 
 	}
 
@@ -150,9 +181,11 @@ public class Sprite implements KeyListener {
 		Arena.missiles.add(new Missile(this, x, y, dir));
 	}
 
-	public void update(int gameTime) {
+	public void update(int gameTime, int increment) {
+		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
 		time = (double) gameTime / 1000;
 		jumpTime += 0.01;
+		xTime += 0.01;
 		updateMovement();
 		if (checkHit() == true && time - hitDelay >= 0.15) {
 			health--;
@@ -161,17 +194,19 @@ public class Sprite implements KeyListener {
 	}
 
 	private boolean checkFloor() {
+		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
 		boolean flag = false;
 		for (int i = 0; i < Arena.hitboxes.size(); i++) {
-			if (Arena.hitboxes.get(i).intersects(
-					new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height), width, height))) {
+			/*
+			 * if (Arena.hitboxes.get(i).intersects( new Rectangle((int) (x * 10
+			 * - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height), width,
+			 * height))) { flag = true; break; }
+			 */
+			// System.out.println(Arena.hitboxes.get(i).y);
+			if (Arena.hitboxes.get(i).intersects(hitbox)) {
 				flag = true;
 				break;
-			} 
-		/*	if (Arena.hitboxes.get(i).y == (int) (1080 - y * 10 - 0.5 * height)) {
-				flag = true;
-				break;
-			} */ 
+			}
 		}
 		return flag;
 	}

@@ -51,7 +51,8 @@ public class ArenaReader {
 
 					
 				
-					list.add(new Rectangle(cX, cY, cW, cH));
+					//list.add(new Rectangle(cX, cY, cW, cH));
+					list.add(new Rectangle(cX, cY, cW, 5));
 					
 				}
 			}

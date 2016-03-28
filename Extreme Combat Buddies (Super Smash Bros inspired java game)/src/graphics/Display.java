@@ -45,7 +45,7 @@ public class Display extends JPanel {
 		g2d.drawImage(game.Arena.arenaImg, 0, 0, null);
 		for (int i = 0; i < game.Arena.hitboxes.size(); i++) {
 			g2d.setColor(Color.BLACK);
-			// g2d.fill(game.Arena.hitboxes.get(i));
+			g2d.fill(game.Arena.hitboxes.get(i));
 		}
 	}
 
@@ -79,6 +79,7 @@ public class Display extends JPanel {
 											// (fixed)
 				System.out.println(x + ", " + y + "-----" + w + "*" + h);
 			}
+			g2d.fill(players[i].hitbox);
 		}
 	}
 
