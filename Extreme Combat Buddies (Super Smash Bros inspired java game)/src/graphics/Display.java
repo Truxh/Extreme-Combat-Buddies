@@ -79,7 +79,7 @@ public class Display extends JPanel {
 											// (fixed)
 				System.out.println(x + ", " + y + "-----" + w + "*" + h);
 			}
-			g2d.fill(players[i].hitbox);
+		//	g2d.fill(players[i].hitbox);
 		}
 	}
 

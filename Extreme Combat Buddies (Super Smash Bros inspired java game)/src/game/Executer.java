@@ -55,7 +55,9 @@ public class Executer {
 
 /*
 TODO: 
-Features:
+-Fix glitch/bug where player can run past wall/jump through wall due to updates not being frequent enough. Store last pt and check
+-draw image/things to scale, change scale factor
+-check player hit with another player
 -crouch implementation
 -user customizable control schemes
 -death animation/effect

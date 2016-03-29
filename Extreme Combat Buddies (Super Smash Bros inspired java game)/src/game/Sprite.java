@@ -47,10 +47,11 @@ public class Sprite implements KeyListener {
 	double burstDelay = 0;
 	double tburstDelay = 0;
 	double floorDelay = 0;
+	double directionDelay = 0;
 	int burstCount = 0;
 	public int health = 3;
 
-	double xvelocity = 1;
+	double xvelocity = 0;
 	double yvelocity = 0;
 	double gravity = -26;
 
@@ -61,6 +62,8 @@ public class Sprite implements KeyListener {
 
 	Point lastPoint;
 	double prevX = x;
+	boolean wallFlag = false;
+	boolean prevDir = dir;
 
 	public Sprite(int i, String name, ControlSet cs) {
 		this.player = i;
@@ -85,23 +88,24 @@ public class Sprite implements KeyListener {
 	public void updateMovement() {
 		crouch = false;
 		if (pressedKeys[cs.left] == true && checkWalls() != true) {
-			xvelocity = -0.5;
-			// x = x + xvelocity;
+			xvelocity = -50;
 			dir = false;
-		} else if (checkWalls() == true) {
-			// x++
-			/*
-			 * System.out.println("here"); xvelocity = 0; xTime -= 3;
-			 */
+			if(dir != prevDir) switchDir();
+			prevDir = false;
+			wallFlag = false;
 		}
 		if (pressedKeys[cs.right] == true && checkWalls() != true) {
-			xvelocity = 0.5;
-			// x = x + xvelocity;
+			xvelocity = 50;
 			dir = true;
-		} else if (checkWalls() == true) {
-			/*
-			 * x-- xvelocity = 0; xTime -= 3;
-			 */
+			if(dir != prevDir) switchDir();
+			prevDir = true;
+			wallFlag = false;
+		} 
+		if (checkWalls() == true) {
+			System.out.println("problem");
+			xTime = 0;
+			startX = x;
+			x = prevX;
 		}
 		if (pressedKeys[cs.jump] == true && time - jumpDelay >= 0.5) {
 			yvelocity = 7;
@@ -143,20 +147,14 @@ public class Sprite implements KeyListener {
 		}
 
 		if (pressedKeys[cs.left] != true && pressedKeys[cs.right] != true) {
-			/*
-			 * xvelocity = 0; xTime = 0;
-			 */
+	
+			 xvelocity = 0;
+			 xTime = 0;
+			 startX = x;
+		
 		}
-		if (player == 0) {
+		if ((pressedKeys[cs.left] == true || pressedKeys[cs.right] == true) && wallFlag != true) {
 			x = (xvelocity * xTime) + startX;
-			System.out.println(name);
-			System.out.println("Time: " + xTime);
-			System.out.println("Velocity: " + xvelocity);
-			System.out.println("X Coord: " + x);
-			System.out.println("Increase " + (x - prevX));
-			System.out.println("Time * Velocity: " + (xvelocity * xTime));
-			System.out.println("Previous X: " + prevX);
-			System.out.println("------------------------------------------- \n");
 			prevX = x;
 		}
 		if (checkFloor() != true) {
@@ -191,18 +189,13 @@ public class Sprite implements KeyListener {
 			health--;
 			hitDelay = time;
 		}
+		lastPoint = new Point((int)x,(int)y);
 	}
 
 	private boolean checkFloor() {
 		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
 		boolean flag = false;
 		for (int i = 0; i < Arena.hitboxes.size(); i++) {
-			/*
-			 * if (Arena.hitboxes.get(i).intersects( new Rectangle((int) (x * 10
-			 * - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height), width,
-			 * height))) { flag = true; break; }
-			 */
-			// System.out.println(Arena.hitboxes.get(i).y);
 			if (Arena.hitboxes.get(i).intersects(hitbox)) {
 				flag = true;
 				break;
@@ -213,11 +206,11 @@ public class Sprite implements KeyListener {
 
 	private boolean checkWalls() {
 		boolean flag = false;
-		if (x == 1)
+		if (x == 0)
 			flag = true;
-		else if (x == 191)
+		else if (x == 1920/graphics.Display.scale )
 			flag = true;
-		else if (y == 108)
+		else if (y == 1080/graphics.Display.scale )
 			flag = true;
 		return flag;
 	}
@@ -227,7 +220,7 @@ public class Sprite implements KeyListener {
 		boolean flag = false;
 		for (int i = 0; i < Arena.missiles.size(); i++) {
 			if (Arena.missiles.get(i).hitbox.intersects(
-					new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height), width, height))) {
+					new Rectangle((int) (x * graphics.Display.scale - 0.5 * width), (int) (1080 - y * graphics.Display.scale - 0.5 * height), width, height))) {
 				flag = true;
 				break;
 			}
@@ -238,6 +231,11 @@ public class Sprite implements KeyListener {
 	private void initKeys() {
 		for (int i = 0; i < pressedKeys.length; i++)
 			pressedKeys[i] = false;
+	}
+	
+	private void switchDir() {
+		xTime = 0;
+		startX = x;
 	}
 
 	@Override
