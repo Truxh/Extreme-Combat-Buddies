@@ -16,7 +16,7 @@ public class Missile {
 	public double height;
 	public boolean dir;
 	public static BufferedImage img;
-	public final double velocity = 0.6;
+	public final double velocity = 0.06 * GameTimer.increment; //feet per 10 mili 
 	public Rectangle hitbox = new Rectangle((int) x,(int) y,(int) width,(int) height);;
 	
 	public Missile(Sprite sprite, double x, double y, boolean dir) {
@@ -39,12 +39,13 @@ public class Missile {
 	}
 	
 	public Point translateCoordinates(double x, double y) {
-		y = 1080 - (y * 10 + 0.5*height);
-		x = (x * 10) - (0.5 * width);
+		y = 1080 - (y * graphics.Display.scale + 0.5*height);
+		x = (x * graphics.Display.scale) - (0.5 * width);
 		return new Point((int) x, (int) y);
 	}
 
-	public void update() {
+	public void update() {	
+		
 		if(dir == true) x += velocity;
 		else x -= velocity;
 		Point p = translateCoordinates(x, y);

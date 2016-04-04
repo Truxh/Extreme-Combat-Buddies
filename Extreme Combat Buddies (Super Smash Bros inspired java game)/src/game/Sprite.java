@@ -173,17 +173,17 @@ public class Sprite implements KeyListener {
 	private void fireMissile() {
 		double x;
 		if (dir == true)
-			x = this.x + 0.6 * this.width / 10;
+			x = this.x + 0.6 * this.width / graphics.Display.scale;
 		else
-			x = this.x - 0.6 * this.width / 10;
+			x = this.x - 0.6 * this.width / graphics.Display.scale;
 		Arena.missiles.add(new Missile(this, x, y, dir));
 	}
 
 	public void update(int gameTime, int increment) {
 		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
 		time = (double) gameTime / 1000;
-		jumpTime += 0.01;
-		xTime += 0.01;
+		jumpTime += (double) increment/1000; //0.01
+		xTime += (double) increment/1000;
 		updateMovement();
 		if (checkHit() == true && time - hitDelay >= 0.15) {
 			health--;
@@ -193,13 +193,22 @@ public class Sprite implements KeyListener {
 	}
 
 	private boolean checkFloor() {
-		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
+		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 5); //20
 		boolean flag = false;
 		for (int i = 0; i < Arena.hitboxes.size(); i++) {
-			if (Arena.hitboxes.get(i).intersects(hitbox)) {
+			Rectangle floor =  Arena.hitboxes.get(i);
+			if (floor.intersects(hitbox)) {
 				flag = true;
 				break;
 			}
+		/*	hitbox.height = height; 
+			floor.height = 25;
+			if(floor.intersects(hitbox)) { //never eval
+				System.out.println("here");
+				y = floor.y;
+				flag = true;
+				break;
+			}; */
 		}
 		return flag;
 	}
