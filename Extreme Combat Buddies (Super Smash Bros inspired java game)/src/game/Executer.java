@@ -57,7 +57,8 @@ public class Executer {
 TODO: 
 -Change the timer interval, fix hardcoded time increases
 -(Quantum Tunneling) http://gamedev.stackexchange.com/questions/18604/how-do-i-handle-collision-detection-so-fast-objects-are-not-allowed-to-pass-thro
--Fix glitch/bug where player can run past wall/jump through wall due to updates not being frequent enough. Store last pt and check
+-Fix glitch/bug where player can run past wall/jump through wall due to updates not being frequent enough. Use last pt/current pt to draw line and check for floor intersect
+-current point is not being updated correctly, last pt = current. SHIT!
 -draw image/things to scale, change scale factor
 -check player hit with another player
 -crouch implementation

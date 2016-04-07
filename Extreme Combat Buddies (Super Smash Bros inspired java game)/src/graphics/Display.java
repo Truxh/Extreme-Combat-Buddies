@@ -3,6 +3,7 @@ package graphics;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -44,8 +45,10 @@ public class Display extends JPanel {
 	public void paintBackground(Graphics2D g2d) {
 		g2d.drawImage(game.Arena.arenaImg, 0, 0, null);
 		for (int i = 0; i < game.Arena.hitboxes.size(); i++) {
+			Rectangle floor = game.Arena.hitboxes.get(i);
 			g2d.setColor(Color.BLACK);
 			g2d.fill(game.Arena.hitboxes.get(i));
+		
 		}
 	}
 
@@ -110,13 +113,26 @@ public class Display extends JPanel {
 	}
 
 	void paintTrail(Graphics2D g2d) {
-		for (int z = 0; z < players.length; z++) {
-			trail.add(translateCoordinates(players[z].x, players[z].y, players[z]));	
+		for (int z = 0; z < players.length; z++) {  
+			g2d.setStroke(new BasicStroke(4));
+			g2d.setColor(Color.MAGENTA);
+		//	g2d.draw(players[z].intersector);
+			
+		/*	trail.add(translateCoordinates(players[z].x, players[z].y, players[z]));	
 			for (int i = 0; i < trail.size(); i++) {
 				g2d.setColor(Color.RED);
 				g2d.fillRect(trail.get(i).x, trail.get(i).y, 2, 2);
-			}
-		}
+				
+			}*/
+		} 
+	
+	}
+	
+	void paintVisualDebug(Graphics2D g2d) {
+		paintTrail(g2d);
+	;
+		
+	
 	}
 
 	public void paintComponent(Graphics g) {
@@ -131,7 +147,9 @@ public class Display extends JPanel {
 		paintPlayers(g2d);
 		paintMissiles(g2d);
 		paintScores(g2d);
-		paintTrail(g2d);
+		paintVisualDebug(g2d);
+		
+		
 
 	}
 }

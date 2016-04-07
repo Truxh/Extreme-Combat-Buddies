@@ -26,6 +26,9 @@ public class GameTimer implements ActionListener{
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+	//	if(gameTime >= 500) gameTimer.stop();
+		
 		gameTime += increment; //10 
 		display.repaint();
 		if(gameTime % 1000 == 0) {

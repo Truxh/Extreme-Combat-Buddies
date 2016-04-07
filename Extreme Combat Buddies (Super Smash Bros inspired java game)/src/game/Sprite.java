@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +17,8 @@ import graphics.Display;
 
 public class Sprite implements KeyListener {
 	/*
-	 * TODO: 1) X movement equation, fix, acceleration of some sort built in? 2)
-	 * store last point and check if current exceeds border y, if so, backup,
-	 * else continue as normal
+	 * TODO: 1) Check if line between current/last point intersects floor, if so
+	 * teleport to that floor/x
 	 */
 
 	File imageLoc = new File("Resources//soldier.png");
@@ -53,17 +53,19 @@ public class Sprite implements KeyListener {
 
 	double xvelocity = 0;
 	double yvelocity = 0;
-	double gravity = -26;
+	final double gravity = -26; // -26
 
 	double jumpTime = 0;
 	double xTime = 0;
 	double jumpDelay = 0;
 	public Rectangle hitbox = new Rectangle(0, 0, 1, 1);
 
-	Point lastPoint;
+	Point lastPoint = new Point();
 	double prevX = x;
 	boolean wallFlag = false;
 	boolean prevDir = dir;
+
+	public Line2D intersector = new Line2D.Float();
 
 	public Sprite(int i, String name, ControlSet cs) {
 		this.player = i;
@@ -73,7 +75,7 @@ public class Sprite implements KeyListener {
 		height = img.getHeight();
 		width = img.getWidth();
 		initKeys();
-		startX=x;
+		startX = x;
 	}
 
 	void readImage() {
@@ -90,24 +92,25 @@ public class Sprite implements KeyListener {
 		if (pressedKeys[cs.left] == true && checkWalls() != true) {
 			xvelocity = -50;
 			dir = false;
-			if(dir != prevDir) switchDir();
+			if (dir != prevDir)
+				switchDir();
 			prevDir = false;
 			wallFlag = false;
 		}
 		if (pressedKeys[cs.right] == true && checkWalls() != true) {
 			xvelocity = 50;
 			dir = true;
-			if(dir != prevDir) switchDir();
+			if (dir != prevDir)
+				switchDir();
 			prevDir = true;
 			wallFlag = false;
-		} 
+		}
 		if (checkWalls() == true) {
-			System.out.println("problem");
 			xTime = 0;
 			startX = x;
 			x = prevX;
 		}
-		if (pressedKeys[cs.jump] == true && time - jumpDelay >= 0.5) {
+		if (pressedKeys[cs.jump] == true && time - jumpDelay >= 0.4) {
 			yvelocity = 7;
 			y++;
 			jumpDelay = time;
@@ -147,11 +150,11 @@ public class Sprite implements KeyListener {
 		}
 
 		if (pressedKeys[cs.left] != true && pressedKeys[cs.right] != true) {
-	
-			 xvelocity = 0;
-			 xTime = 0;
-			 startX = x;
-		
+
+			xvelocity = 0;
+			xTime = 0;
+			startX = x;
+
 		}
 		if ((pressedKeys[cs.left] == true || pressedKeys[cs.right] == true) && wallFlag != true) {
 			x = (xvelocity * xTime) + startX;
@@ -180,56 +183,68 @@ public class Sprite implements KeyListener {
 	}
 
 	public void update(int gameTime, int increment) {
-		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 20);
+		// lastPoint = new Point((int) (x*10- 0.5 * width),(int)(1080 - y * 10 -0.5 * height));
 		time = (double) gameTime / 1000;
-		jumpTime += (double) increment/1000; //0.01
-		xTime += (double) increment/1000;
+		jumpTime += (double) increment / 1000; // 0.01
+		xTime += (double) increment / 1000;
 		updateMovement();
 		if (checkHit() == true && time - hitDelay >= 0.15) {
 			health--;
 			hitDelay = time;
 		}
-		lastPoint = new Point((int)x,(int)y);
+	}
+
+	private boolean lineIntersect(Point c1, Point c2, Rectangle floor) {
+		Line2D floorLine = new Line2D.Float((float) floor.x, (float) floor.y, (float) (floor.x + floor.getWidth()),
+				(float) floor.y);
+
+		intersector = new Line2D.Float(c1, c2);
+
+		if (intersector.intersectsLine(floorLine))
+			return true;
+		else
+			return false;
+
 	}
 
 	private boolean checkFloor() {
-		hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 5); //20
+		//hitbox = new Rectangle((int) (x * 10 - 0.5 * width), (int) (1080 - y * 10 - 0.5 * height) + 50, width, 5); // 20
 		boolean flag = false;
+		Point currentPoint = new Point((int)((x * 10 - 0.5 * width)+0.5 * width), (int) ((1080 - y * 10 - 0.5 * height)+height));
 		for (int i = 0; i < Arena.hitboxes.size(); i++) {
-			Rectangle floor =  Arena.hitboxes.get(i);
-			if (floor.intersects(hitbox)) {
+			Rectangle floor = Arena.hitboxes.get(i);
+			 //if (floor.intersects(hitbox)) { flag = true;g break; }
+			if (lineIntersect(currentPoint, lastPoint, floor)) {
+				y = (1080 - floor.y + height / 2) / 10 + 1;
 				flag = true;
-				break;
 			}
-		/*	hitbox.height = height; 
-			floor.height = 25;
-			if(floor.intersects(hitbox)) { //never eval
-				System.out.println("here");
-				y = floor.y;
-				flag = true;
-				break;
-			}; */
 		}
+		lastPoint = currentPoint;
 		return flag;
 	}
 
 	private boolean checkWalls() {
 		boolean flag = false;
-		if (x == 0)
+		if (x <= 10/graphics.Display.scale) {
 			flag = true;
-		else if (x == 1920/graphics.Display.scale )
+			x+=0.1;
+		}
+		else if (x >= 1918 / graphics.Display.scale) {
 			flag = true;
-		else if (y == 1080/graphics.Display.scale )
-			flag = true;
+			x-=0.1;
+		}
+		
+		
 		return flag;
+	
 	}
 
 	public boolean checkHit() {
 
 		boolean flag = false;
 		for (int i = 0; i < Arena.missiles.size(); i++) {
-			if (Arena.missiles.get(i).hitbox.intersects(
-					new Rectangle((int) (x * graphics.Display.scale - 0.5 * width), (int) (1080 - y * graphics.Display.scale - 0.5 * height), width, height))) {
+			if (Arena.missiles.get(i).hitbox.intersects(new Rectangle((int) (x * graphics.Display.scale - 0.5 * width),
+					(int) (1080 - y * graphics.Display.scale - 0.5 * height), width, height))) {
 				flag = true;
 				break;
 			}
@@ -241,7 +256,7 @@ public class Sprite implements KeyListener {
 		for (int i = 0; i < pressedKeys.length; i++)
 			pressedKeys[i] = false;
 	}
-	
+
 	private void switchDir() {
 		xTime = 0;
 		startX = x;
